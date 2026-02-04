@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>reLEAF Shop</title>
+
+    <!-- Bootstrap 5.3 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Comic-style fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root{
+        --bg: #0b0b0b;           /* near black */
+        --brown: #3a2416;        /* deep brown */
+        --orange: #ff7a18;       /* warm orange */
+        --tan: #d7b38c;          /* warm accent */
+        --card: rgba(58, 36, 22, 0.62);
+        --border: rgba(255, 122, 24, 0.28);
+      }
+
+      body{
+        font-family: "Comic Neue", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: var(--bg);
+        color: #f3f3f3;
+        overflow-x: hidden;
+      }
+
+      /* Comic NYC background layers */
+      body::before{
+        content:"";
+        position: fixed;
+        inset: 0;
+        z-index: -3;
+
+        /* Halftone dots + subtle gradient */
+        background:
+          radial-gradient(circle at 10px 10px, rgba(255,122,24,.18) 2px, transparent 2.2px),
+          radial-gradient(circle at 18px 18px, rgba(215,179,140,.10) 2px, transparent 2.2px),
+          radial-gradient(1200px 600px at 15% 10%, rgba(255,122,24,.14), transparent 60%),
+          radial-gradient(900px 500px at 90% 20%, rgba(215,179,140,.12), transparent 55%),
+          linear-gradient(180deg, #0b0b0b, #070707);
+        background-size: 26px 26px, 34px 34px, auto, auto, auto;
+        filter: contrast(1.05) saturate(1.05);
+      }
+
+      /* NYC skyline comic silhouette (SVG data URI) */
+      body::after{
+        content:"";
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        height: 38vh;
+        z-index: -2;
+        pointer-events: none;
+        opacity: .55;
+
+        background:
+          /* warm glow at horizon */
+          radial-gradient(900px 240px at 50% 100%, rgba(255,122,24,.25), transparent 60%),
+          /* skyline svg */
+          url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 600'>\
+<defs>\
+  <filter id='ink' x='-20%' y='-20%' width='140%' height='140%'>\
+    <feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='1' stitchTiles='stitch'/>\
+    <feDisplacementMap in2='SourceGraphic' scale='6'/>\
+  </filter>\
+</defs>\
+<rect width='1600' height='600' fill='none'/>\
+<g filter='url(%23ink)' fill='%23000000'>\
+  <path d='M0,520 L0,450 L40,450 L40,410 L80,410 L80,460 L120,460 L120,380 L155,380 L155,470 L200,470 L200,360 L240,360 L240,430 L270,430 L270,330 L320,330 L320,520 Z'/>\
+  <path d='M330,520 L330,410 L360,410 L360,360 L410,360 L410,280 L450,280 L450,350 L480,350 L480,420 L520,420 L520,340 L560,340 L560,520 Z'/>\
+  <path d='M570,520 L570,390 L610,390 L610,250 L660,250 L660,160 L690,160 L690,240 L720,240 L720,420 L760,420 L760,310 L800,310 L800,520 Z'/>\
+  <path d='M810,520 L810,300 L850,300 L850,180 L900,180 L900,120 L920,120 L920,180 L960,180 L960,420 L1010,420 L1010,350 L1050,350 L1050,520 Z'/>\
+  <path d='M1060,520 L1060,420 L1100,420 L1100,260 L1140,260 L1140,340 L1180,340 L1180,210 L1240,210 L1240,140 L1260,140 L1260,210 L1290,210 L1290,430 L1340,430 L1340,520 Z'/>\
+  <path d='M1350,520 L1350,380 L1380,380 L1380,320 L1420,320 L1420,260 L1460,260 L1460,420 L1500,420 L1500,350 L1540,350 L1540,520 Z'/>\
+  <rect x='0' y='520' width='1600' height='80'/>\
+</g>\
+</svg>");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: bottom center;
+      }
+
+      /* Navbar */
+      .navbar{
+        background: rgba(11,11,11,.78);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 122, 24, 0.15);
+      }
+      .navbar-brand{
+        font-family: "Bangers", cursive;
+        letter-spacing: 1px;
+        font-size: 1.6rem;
+      }
+
+      .brand-dot{
+        width: 10px; height: 10px; border-radius: 50%;
+        background: var(--orange);
+        display:inline-block; margin-right: .5rem;
+        box-shadow: 0 0 18px rgba(255,122,24,.55);
+      }
+
+      /* Hero */
+      .hero{
+        min-height: 70vh;
+        position: relative;
+        border-bottom: 1px solid rgba(255, 122, 24, 0.15);
+
+        /* Comic-ish: halftone overlay + city photo beneath (still works if you swap image) */
+        background:
+          linear-gradient(180deg, rgba(0,0,0,.72), rgba(0,0,0,.70)),
+          radial-gradient(circle at 10px 10px, rgba(255,122,24,.18) 2px, transparent 2.2px),
+          url("https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=2400&q=70")
+          center/cover no-repeat;
+        background-size: auto, 26px 26px, cover;
+      }
+
+      .hero-card{
+        background: rgba(58, 36, 22, 0.62);
+        border: 2px solid rgba(255, 122, 24, 0.28);
+        border-radius: 1.25rem;
+        box-shadow: 0 14px 40px rgba(0,0,0,.45);
+      }
+
+      .badge-theme{
+        background: rgba(255, 122, 24, 0.15);
+        border: 2px solid rgba(255, 122, 24, 0.25);
+        color: #ffd2b1;
+        font-weight: 700;
+      }
+
+      .hero h1{
+        font-family: "Bangers", cursive;
+        letter-spacing: 1px;
+        text-shadow: 0 4px 0 rgba(0,0,0,.55);
+      }
+
+      /* Sections */
+      .section{
+        padding: 3.25rem 0;
+      }
+
+      /* Comic card look */
+      .card-option{
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 1rem;
+        transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+        height: 100%;
+        box-shadow: 0 10px 0 rgba(0,0,0,.35);
+      }
+      .card-option:hover{
+        transform: translateY(-2px);
+        border-color: rgba(255, 122, 24, 0.55);
+        box-shadow: 0 12px 0 rgba(0,0,0,.35);
+      }
+
+      /* Product image placeholder styling */
+      .product-img{
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: .85rem;
+        border: 2px solid rgba(255,122,24,.22);
+        box-shadow: inset 0 0 0 2px rgba(0,0,0,.35);
+      }
+      .img-frame{
+        position: relative;
+        border-radius: .95rem;
+        overflow: hidden;
+      }
+      .img-frame::after{
+        content:"";
+        position:absolute;
+        inset:0;
+        background:
+          radial-gradient(circle at 10px 10px, rgba(0,0,0,.18) 2px, transparent 2.2px);
+        background-size: 18px 18px;
+        mix-blend-mode: multiply;
+        opacity:.35;
+        pointer-events:none;
+      }
+
+      .form-control, .form-select{
+        background: rgba(0,0,0,.25);
+        border: 2px solid rgba(255, 122, 24, 0.22);
+        color: #f3f3f3;
+        font-weight: 700;
+      }
+      .form-control:focus, .form-select:focus{
+        border-color: rgba(255, 122, 24, 0.65);
+        box-shadow: 0 0 0 .25rem rgba(255, 122, 24, 0.18);
+      }
+
+      .btn-orange{
+        background: var(--orange);
+        border: 2px solid rgba(0,0,0,.35);
+        color: #111;
+        font-weight: 900;
+        box-shadow: 0 8px 0 rgba(0,0,0,.35);
+        border-radius: .9rem;
+      }
+      .btn-orange:hover{
+        transform: translateY(-1px);
+        filter: brightness(0.96);
+      }
+      .btn-orange:active{
+        transform: translateY(6px);
+        box-shadow: 0 2px 0 rgba(0,0,0,.35);
+      }
+
+      .btn-outline-tan{
+        border: 2px solid rgba(215, 179, 140, 0.7);
+        color: rgba(215, 179, 140, 0.98);
+        font-weight: 900;
+        border-radius: .9rem;
+        box-shadow: 0 8px 0 rgba(0,0,0,.25);
+      }
+      .btn-outline-tan:hover{
+        background: rgba(215, 179, 140, 0.12);
+        border-color: rgba(215, 179, 140, 0.95);
+        color: #fff;
+      }
+
+      footer{
+        border-top: 1px solid rgba(255, 122, 24, 0.15);
+        padding: 2rem 0;
+        color: rgba(255,255,255,.75);
+      }
+
+      @media (max-width: 576px){
+        .hero{ min-height: 78vh; }
+        .navbar-brand{ font-size: 1.35rem; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Nav -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+      <div class="container">
+        <a class="navbar-brand fw-semibold" href="#">
+          <span class="brand-dot"></span>
+          re<span style="color: var(--orange)">LEAF</span> SHOP
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navMenu"
+          aria-controls="navMenu"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="#products">Products</a></li>
+            <li class="nav-item"><a class="nav-link" href="#checkout">Checkout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero d-flex align-items-center">
+      <div class="container py-5">
+        <div class="row align-items-center gy-4">
+          <div class="col-12 col-lg-7">
+            <div class="hero-card p-4 p-md-5">
+              <span class="badge badge-theme rounded-pill px-3 py-2 mb-3">We All Need Some reLEAF!</span>
+              <h1 class="display-5 fw-bold mb-3">
+                YOU NEED SOME reLEAF?!<br class="d-none d-md-block" />
+               Browse Our Products Now.
+              </h1>
+              <p class="lead mb-4 text-white-50">
+                Choose Cigarettes and/or ReLEAF, then submit your order details.
+              </p>
+              <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-orange btn-lg" href="#products">Select Products</a>
+                <a class="btn btn-outline-tan btn-lg" href="#checkout">Our Menu</a>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Products / Form -->
+    <section id="products" class="section">
+      <div class="container">
+        <div class="row mb-4 align-items-end">
+          <div class="col-12 col-md-8">
+            <h2 class="fw-bold mb-2" style="font-family: Bangers, cursive; letter-spacing: 1px; font-size: 2.25rem;">
+              SELECT YOUR PRODUCTS
+            </h2>
+            <p class="text-white-50 mb-0">
+              Choose quantities/amounts below — the summary updates automatically.
+            </p>
+          </div>
+        </div>
+
+        <form id="orderForm" action="https://formsubmit.co/odot.rva@proton.me" method="POST">
+
+          <!-- Left: Product options -->
+          <div class="col-12 col-lg-8">
+            <div class="row g-3">
+              <!-- Cigarettes -->
+              <div class="col-12 col-md-6">
+                <div class="card-option p-3 h-100">
+                  <div class="img-frame mb-3">
+                    <!-- Replace src with your real product image -->
+                    <img
+                      class="product-img"
+                      src="cigs.png"
+                      alt="Cigarettes product image placeholder"
+                    />
+                  </div>
+
+                  <div class="fw-bold mb-1" style="font-family: Bangers, cursive; letter-spacing: 1px; font-size: 1.35rem;">
+                    🚬 CIGARETTES
+                  </div>
+                  <div class="small text-white-50 mb-3">$1.00 each</div>
+
+                  <label class="form-label small text-white-50">Quantity</label>
+                  <select class="form-select" id="cigQty" aria-label="Cigarettes quantity">
+                    <option value="0" selected>Select quantity</option>
+                    <option value="1">1 ($1)</option>
+                    <option value="2">2 ($2)</option>
+                    <option value="3">3 ($3)</option>
+                    <option value="4">4 ($4)</option>
+                    <option value="5">5 ($5)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- ReLEAF -->
+              <div class="col-12 col-md-6">
+                <div class="card-option p-3 h-100">
+                  <div class="img-frame mb-3">
+                    <!-- Replace src with your real product image -->
+                    <img
+                      class="product-img"
+                      src="canpot.png"
+                      alt="ReLEAF product image placeholder"
+                    />
+                  </div>
+
+                  <div class="fw-bold mb-1" style="font-family: Bangers, cursive; letter-spacing: 1px; font-size: 1.35rem;">
+                    🌿 ReLEAF
+                  </div>
+                  <div class="small text-white-50 mb-3">Select weight</div>
+
+                  <label class="form-label small text-white-50">Amount</label>
+                  <select class="form-select" id="releafQty" aria-label="ReLEAF amount">
+                    <option value="" selected>Select amount</option>
+                    <option value="5">0.5g – $5</option>
+                    <option value="10">1g – $10</option>
+                    <option value="30">3.5g – $30</option>
+                    <option value="40">14g – $40</option>
+                    <option value="160">28g – $160</option>
+                  </select>
+                </div>
+              </div>
+
+              
+
+              
+            </div>
+          </div>
+
+          <!-- Right: Summary + customer details -->
+          <div id="checkout" class="col-12 col-lg-4">
+            <div class="p-4 rounded-4" style="background: rgba(0,0,0,.25); border: 2px solid rgba(255,122,24,.18); box-shadow: 0 10px 0 rgba(0,0,0,.25);">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <h3 class="h5 fw-bold mb-0" style="font-family: Bangers, cursive; letter-spacing: 1px;">
+                  ORDER SUMMARY
+                </h3>
+                <span class="small text-white-50" id="itemCount">0 items</span>
+              </div>
+
+              <div class="small text-white-50 mb-2">Selected products</div>
+              <div id="summaryList" class="mb-3">
+                <div class="text-white-50 small">No products selected.</div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top"
+                   style="border-color: rgba(255,122,24,.15) !important;">
+                <div class="fw-bold">Total</div>
+                <div class="fw-bold" style="color: var(--orange);" id="total">$0.00</div>
+              </div>
+
+              <hr class="my-4" style="border-color: rgba(255,122,24,.15)"/>
+
+              <div class="mb-3">
+                <label class="form-label small text-white-50">Full name</label>
+                <input class="form-control" type="text" name="name" placeholder="Your name" required />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small text-white-50">Email</label>
+                <input class="form-control" type="email" name="email" placeholder="you@example.com" required />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small text-white-50">Delivery method</label>
+                <select class="form-select" name="delivery" required>
+                  <option value="" selected disabled>Choose one…</option>
+                  <option>Local pickup</option>
+                  <option>Standard shipping</option>
+                  <option>Express shipping</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small text-white-50">Notes</label>
+                <textarea class="form-control" name="notes" rows="3" placeholder="Anything we should know?"></textarea>
+              </div>
+
+              <input type="hidden" name="items" id="itemsField" placeholder="Room No, Things like that." />
+
+              <!-- FormSubmit configuration -->
+                <!-- Hidden config fields -->
+            <input type="hidden" name="_subject" value="🗽 reLEAF Store Order" />
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="hidden" name="_template" value="table" />
+            <input type="hidden" name="_autoresponse" value="Thanks for your order!" />
+
+            <input type="hidden" name="items" id="itemsField" />
+
+            <button type="submit" class="btn btn-orange w-100 btn-lg">
+            SUBMIT ORDER
+            </button>
+
+              <div class="small text-white-50 mt-2">
+                Need Credit?! Let's talk! I'm serious bout my bread! Hehehehe... * Evil Laugh
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+          <div class="small">© <span id="year"></span> reLEAF Store</div>
+          
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      const cigQty = document.getElementById("cigQty");
+      const releafQty = document.getElementById("releafQty");
+      const summaryList = document.getElementById("summaryList");
+      const totalEl = document.getElementById("total");
+      const itemCountEl = document.getElementById("itemCount");
+      const itemsField = document.getElementById("itemsField");
+      const yearEl = document.getElementById("year");
+      const form = document.getElementById("orderForm");
+
+      yearEl.textContent = new Date().getFullYear();
+
+      function money(n){
+        return n.toLocaleString(undefined, { style: "currency", currency: "USD" });
+      }
+
+      function updateSummary(){
+        let total = 0;
+        let items = [];
+        let count = 0;
+
+        // Cigarettes: $1 each, qty 1-5
+        const cigCount = parseInt(cigQty.value || "0", 10);
+        if (cigCount > 0){
+          const cigTotal = cigCount * 1.0;
+          items.push({
+            label: `Cigarettes x${cigCount}`,
+            detail: `${cigCount} × ${money(1)} = ${money(cigTotal)}`,
+            line: cigTotal
+          });
+          total += cigTotal;
+          count += cigCount;
+        }
+
+        // ReLEAF: preset amounts/prices
+        if (releafQty.value){
+          const price = parseFloat(releafQty.value);
+          const label = releafQty.options[releafQty.selectedIndex].text; // e.g., "0.5g – $5"
+          items.push({
+            label: "ReLEAF",
+            detail: label,
+            line: price
+          });
+          total += price;
+          count += 1; // count as 1 line-item selection
+        }
+
+        // Render summary
+        if (items.length === 0){
+          summaryList.innerHTML = `<div class="text-white-50 small">No products selected.</div>`;
+        } else {
+          summaryList.innerHTML = items.map(it => `
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <div class="fw-bold">${it.label}</div>
+                <div class="small text-white-50">${it.detail}</div>
+              </div>
+              <div class="fw-bold">${money(it.line)}</div>
+            </div>
+          `).join("");
+        }
+
+        totalEl.textContent = money(total);
+        itemCountEl.textContent = `${count} item${count === 1 ? "" : "s"}`;
+
+        // For form submission
+        const packed = [];
+        if (cigCount > 0) packed.push(`Cigarettes x${cigCount} ($${(cigCount * 1).toFixed(2)})`);
+        if (releafQty.value) packed.push(`ReLEAF: ${releafQty.options[releafQty.selectedIndex].text}`);
+        itemsField.value = packed.join(", ");
+      }
+
+      cigQty.addEventListener("change", updateSummary);
+      releafQty.addEventListener("change", updateSummary);
+
+      form.addEventListener("submit", (e) => {
+        // make sure summary is up to date
+        updateSummary();
+
+        // simple validation before submit
+        if (!itemsField.value) {
+            e.preventDefault();
+            alert("Please select at least one product.");
+            return;
+        }
+      });
+
+      updateSummary();
+    </script>
+  </body>
+</html>
